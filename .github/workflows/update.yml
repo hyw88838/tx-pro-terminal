@@ -1,0 +1,27 @@
+name: Skynet_Update
+on:
+  schedule:
+    - cron: '*/10 * * * *' # 每10分钟更新一次，够狂野
+  workflow_dispatch:
+jobs:
+  run_sentinel:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Run Agent
+        run: |
+          pip install requests
+          python agent.py
+      - name: Push Data
+        run: |
+          git config --global user.name "Sentinel-Bot"
+          git config --global user.email "bot@github.com"
+          git add data.json
+          git commit -m "数据同步更新" || exit 0
+          git push
